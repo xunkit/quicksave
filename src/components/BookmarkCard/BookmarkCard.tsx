@@ -15,17 +15,60 @@ import {
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
 import { Copy, MoreHorizontal, Star, Trash } from "lucide-react";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 
-function BookmarkCard() {
+interface BookmarkCardProps {
+  id: number;
+  title: string;
+  description: string;
+  link: string;
+  imageSrc: string;
+  parentSite: string;
+  isDraggable: boolean;
+}
+
+function BookmarkCard({
+  id,
+  title,
+  description,
+  link,
+  imageSrc,
+  parentSite,
+  isDraggable,
+}: BookmarkCardProps) {
+  const { attributes, listeners, setNodeRef, transform, transition } =
+    useSortable({ id });
+
+  // Recommended styling for smooth and fancy dragging
+  const style = {
+    transition,
+    transform: CSS.Transform.toString(transform),
+  };
+
+  // When it's dragging time, turn into a div to prevent accidentally opening a link
+  const Comp = isDraggable ? "div" : "a";
+
   return (
-    <a href="https://unsplash.com" target="_blank" className="group">
+    <Comp
+      href={isDraggable ? undefined : link}
+      target={isDraggable ? undefined : "_blank"}
+      className="group touch-none"
+      ref={setNodeRef}
+      {...attributes}
+      {...listeners}
+      style={style}
+    >
       <Card className="overflow-hidden">
         <div className="-mt-6 relative">
-          <img
-            src="https://images.unsplash.com/photo-1723118641440-485d9630c3c3?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D"
-            alt="Preview image"
-            className="w-[100%] group-hover:scale-105 transition-transform duration-300 ease-in-out"
-          />
+          <div className="overflow-hidden">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={imageSrc}
+              alt="Preview image"
+              className="w-[100%] group-hover:scale-105 transition-transform duration-300 ease-in-out"
+            />
+          </div>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button
@@ -55,16 +98,14 @@ function BookmarkCard() {
           </DropdownMenu>
         </div>
         <CardContent className="flex flex-col gap-2">
-          <CardTitle>
-            A sculpture is shown against a blue sky - Unsplash
-          </CardTitle>
-          <CardDescription className="text-xs">Cool design</CardDescription>
+          <CardTitle>{title}</CardTitle>
+          <CardDescription className="text-xs">{description}</CardDescription>
         </CardContent>
         <CardFooter className="text-xs text-muted-foreground">
-          www.unsplash.com
+          {parentSite}
         </CardFooter>
       </Card>
-    </a>
+    </Comp>
   );
 }
 
