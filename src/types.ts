@@ -1,8 +1,15 @@
+export interface List {
+  id: string;
+  name: string;
+  userId: string;
+  bookmarks: Array<Bookmark>;
+}
+
 export interface Bookmark {
   title: string;
   description: string;
   imageSrc: string;
-  link: string;
+  url: string;
   parentSite: string;
   id: number;
 }

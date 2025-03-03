@@ -22,7 +22,7 @@ interface BookmarkCardProps {
   id: number;
   title: string;
   description: string;
-  link: string;
+  url: string;
   imageSrc: string;
   parentSite: string;
   isDraggable: boolean;
@@ -32,7 +32,7 @@ function BookmarkCard({
   id,
   title,
   description,
-  link,
+  url,
   imageSrc,
   parentSite,
   isDraggable,
@@ -51,7 +51,7 @@ function BookmarkCard({
 
   return (
     <Comp
-      href={isDraggable ? undefined : link}
+      href={isDraggable ? undefined : url}
       target={isDraggable ? undefined : "_blank"}
       className="group touch-none"
       ref={setNodeRef}
@@ -69,33 +69,35 @@ function BookmarkCard({
               className="w-[100%] group-hover:scale-105 transition-transform duration-300 ease-in-out"
             />
           </div>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="icon"
-                className="h-8 w-8 absolute right-2.5 top-2.5"
-              >
-                <MoreHorizontal className="h-4 w-4" />
-                <span className="sr-only">Open menu</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem>
-                <Star className="mr-2 h-4 w-4" />
-                <span>Favorite</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem>
-                <Copy className="mr-2 h-4 w-4" />
-                <span>Copy URL</span>
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem variant="destructive">
-                <Trash className="mr-2 h-4 w-4" />
-                <span>Delete</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          {isDraggable === false && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  size="icon"
+                  className="h-8 w-8 absolute right-2.5 top-2.5"
+                >
+                  <MoreHorizontal className="h-4 w-4" />
+                  <span className="sr-only">Open menu</span>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end">
+                <DropdownMenuItem>
+                  <Star className="mr-2 h-4 w-4" />
+                  <span>Favorite</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Copy className="mr-2 h-4 w-4" />
+                  <span>Copy URL</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem variant="destructive">
+                  <Trash className="mr-2 h-4 w-4" />
+                  <span>Delete</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
         <CardContent className="flex flex-col gap-2">
           <CardTitle>{title}</CardTitle>

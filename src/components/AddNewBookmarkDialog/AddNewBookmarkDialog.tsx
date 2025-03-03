@@ -14,7 +14,7 @@ import { Button } from "../ui/button";
 import { CirclePlus } from "lucide-react";
 import { Input } from "../ui/input";
 import { Label } from "../ui/label";
-import { addNewList } from "@/app/actions";
+import { addNewBookmark } from "@/app/actions";
 import { ActionState } from "@/types";
 
 const initialState: ActionState = {
@@ -23,11 +23,11 @@ const initialState: ActionState = {
   errors: [],
 };
 
-function AddNewListDialog() {
+function AddNewBookmarkDialog() {
   const [open, setOpen] = React.useState<boolean>(false);
-  const [newListName, setNewListName] = React.useState<string>("");
+  const [link, setLink] = React.useState<string>("");
   const [state, action, pending] = React.useActionState(
-    addNewList,
+    addNewBookmark,
     initialState
   );
   const [errors, setErrors] = React.useState<Array<string>>([]);
@@ -38,7 +38,7 @@ function AddNewListDialog() {
   // - Check if the submission was NOT OK, if NOT OK -> pass errors from the action state to 'errors'
   React.useEffect(() => {
     if (state.success) {
-      setNewListName("");
+      setLink("");
       setOpen(false);
     } else {
       setErrors(state.errors ? state.errors : []);
@@ -48,7 +48,7 @@ function AddNewListDialog() {
   // What this does: reset the list name field and set errors to an empty array (resetting the error)
   const resetForm = () => {
     if (!open) {
-      setNewListName("");
+      setLink("");
       setErrors([]);
     }
   };
@@ -64,28 +64,28 @@ function AddNewListDialog() {
       <DialogTrigger asChild>
         <Button variant="default" className="text-left justify-start">
           <CirclePlus />
-          New List
+          New Bookmark
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>New List</DialogTitle>
+          <DialogTitle>New Bookmark</DialogTitle>
           <DialogDescription>
-            Enter a name for your new list. Click save when you&apos;re done.
+            Add a new bookmark. Click save when you&apos;re done.
           </DialogDescription>
         </DialogHeader>
         <form action={action}>
           <div className="py-4">
             <div className="flex items-center gap-4">
-              <Label htmlFor="name" className="text-right">
-                Name
+              <Label htmlFor="link" className="text-right">
+                Link
               </Label>
               <Input
-                id="name"
-                value={newListName}
-                onChange={(e) => setNewListName(e.target.value)}
+                id="link"
+                value={link}
+                onChange={(e) => setLink(e.target.value)}
                 className="col-span-3"
-                name="newListName"
+                name="link"
                 required
               />
             </div>
@@ -110,4 +110,4 @@ function AddNewListDialog() {
   );
 }
 
-export default AddNewListDialog;
+export default AddNewBookmarkDialog;

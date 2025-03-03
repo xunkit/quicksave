@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { Input } from "../ui/input";
-import { CirclePlus, Search } from "lucide-react";
+import { Search } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -10,7 +10,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import { Button } from "../ui/button";
 import BookmarkCard from "../BookmarkCard";
 
 import {
@@ -31,6 +30,7 @@ import {
 } from "@dnd-kit/sortable";
 import FloatingEditButton from "../FloatingEditButton";
 import { Bookmark } from "@/types";
+import AddNewBookmarkDialog from "../AddNewBookmarkDialog";
 
 function CollectionView() {
   const [items, setItems] = React.useState<Array<Bookmark>>([
@@ -39,7 +39,7 @@ function CollectionView() {
       description: "cool image",
       imageSrc:
         "https://images.unsplash.com/photo-1723118641440-485d9630c3c3?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      link: "https://unsplash.com",
+      url: "https://unsplash.com",
       parentSite: "www.unsplash.com",
       id: 1,
     },
@@ -48,7 +48,7 @@ function CollectionView() {
       description: "cool image",
       imageSrc:
         "https://images.unsplash.com/photo-1723118641440-485d9630c3c3?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      link: "https://unsplash.com",
+      url: "https://unsplash.com",
       parentSite: "www.unsplash.com",
       id: 2,
     },
@@ -57,7 +57,7 @@ function CollectionView() {
       description: "cool image",
       imageSrc:
         "https://images.unsplash.com/photo-1723118641440-485d9630c3c3?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      link: "https://unsplash.com",
+      url: "https://unsplash.com",
       parentSite: "www.unsplash.com",
       id: 3,
     },
@@ -66,7 +66,7 @@ function CollectionView() {
       description: "cool image",
       imageSrc:
         "https://images.unsplash.com/photo-1723118641440-485d9630c3c3?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      link: "https://unsplash.com",
+      url: "https://unsplash.com",
       parentSite: "www.unsplash.com",
       id: 4,
     },
@@ -136,10 +136,7 @@ function CollectionView() {
               <SelectItem value="z-a">Z-A</SelectItem>
             </SelectContent>
           </Select>
-          <Button>
-            <CirclePlus />
-            New Bookmark
-          </Button>
+          <AddNewBookmarkDialog />
         </div>
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 p-4 gap-4 overflow-hidden">
@@ -159,7 +156,7 @@ function CollectionView() {
                 title={`${item.title} ${item.id}`}
                 description={item.description}
                 imageSrc={item.imageSrc}
-                link={item.link}
+                url={item.url}
                 parentSite={item.parentSite}
                 isDraggable={isDraggable}
                 id={item.id}
