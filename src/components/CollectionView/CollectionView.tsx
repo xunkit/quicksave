@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "../ui/select";
-import BookmarkCard from "../BookmarkCard";
+import BookmarkCard, { SkeletonBookmarkCard } from "../BookmarkCard";
 
 import {
   DndContext,
@@ -31,49 +31,31 @@ import {
 import FloatingEditButton from "../FloatingEditButton";
 import { Bookmark } from "@/types";
 import AddNewBookmarkDialog from "../AddNewBookmarkDialog";
+import { Skeleton } from "../ui/skeleton";
 
-function CollectionView() {
-  const [items, setItems] = React.useState<Array<Bookmark>>([
-    {
-      title: "A sculpture is shown against a blue sky - Unsplash",
-      description: "cool image",
-      imageSrc:
-        "https://images.unsplash.com/photo-1723118641440-485d9630c3c3?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      url: "https://unsplash.com",
-      parentSite: "www.unsplash.com",
-      id: 1,
-    },
-    {
-      title: "A sculpture is shown against a blue sky - Unsplash",
-      description: "cool image",
-      imageSrc:
-        "https://images.unsplash.com/photo-1723118641440-485d9630c3c3?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      url: "https://unsplash.com",
-      parentSite: "www.unsplash.com",
-      id: 2,
-    },
-    {
-      title: "A sculpture is shown against a blue sky - Unsplash",
-      description: "cool image",
-      imageSrc:
-        "https://images.unsplash.com/photo-1723118641440-485d9630c3c3?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      url: "https://unsplash.com",
-      parentSite: "www.unsplash.com",
-      id: 3,
-    },
-    {
-      title: "A sculpture is shown against a blue sky - Unsplash",
-      description: "cool image",
-      imageSrc:
-        "https://images.unsplash.com/photo-1723118641440-485d9630c3c3?q=80&w=2070&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
-      url: "https://unsplash.com",
-      parentSite: "www.unsplash.com",
-      id: 4,
-    },
-  ]);
+interface CollectionViewProps {
+  bookmarks: Bookmark[];
+  currentListName: string | null;
+  currentListId: string | null;
+  skeleton: boolean;
+  noListSelected: boolean;
+}
 
+function CollectionView({
+  bookmarks,
+  currentListName,
+  currentListId,
+  skeleton,
+  noListSelected,
+}: CollectionViewProps) {
   // DRAG AND DROP LOGIC ↓↓ ----------------------------
   // NOTE: 'item' is referring to BOOKMARK
+
+  const [items, setItems] = React.useState<Array<Bookmark>>([]);
+
+  React.useEffect(() => {
+    if (bookmarks) setItems(bookmarks);
+  }, [bookmarks]);
 
   // isDraggable: This value becomes true when the user has clicked the Edit button
   const [isDraggable, setIsDraggable] = React.useState<boolean>(false);
@@ -111,67 +93,97 @@ function CollectionView() {
 
   // DRAG AND DROP LOGIC ↑↑ ----------------------------
 
-  return (
-    <div className="flex-1 flex flex-col">
-      <header className="h-14 border-b bg-muted/40"></header>
-      <div className="flex items-center px-4 h-14 border-b">
-        <h2 className="font-bold flex-1">Development</h2>
-        <div className="flex gap-2">
-          <div className="relative">
-            <Search className="absolute left-2.5 top-2.5 w-4 h-4" />
-            <Input
-              type="search"
-              className="pl-8 w-[200px] hover:bg-accent"
-              placeholder="Search"
-            />
+  if (noListSelected) {
+    return (
+      <div className="flex-1 flex flex-col">
+        <header className="h-14 border-b bg-muted/40"></header>
+      </div>
+    );
+  }
+
+  if (!skeleton)
+    return (
+      <div className="flex-1 flex flex-col">
+        <header className="h-14 border-b bg-muted/40"></header>
+        <div className="flex items-center px-4 h-14 border-b">
+          <h2 className="font-bold flex-1">{currentListName}</h2>
+          <div className="flex gap-2">
+            <div className="relative">
+              <Search className="absolute left-2.5 top-2.5 w-4 h-4" />
+              <Input
+                type="search"
+                className="pl-8 w-[200px] hover:bg-accent"
+                placeholder="Search"
+              />
+            </div>
+            <Select defaultValue="newest">
+              <SelectTrigger className="w-[100px] hover:bg-accent">
+                <SelectValue
+                  placeholder="Sort by"
+                  className="hover:bg-accent"
+                />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="newest">Newest</SelectItem>
+                <SelectItem value="oldest">Oldest</SelectItem>
+              </SelectContent>
+            </Select>
+            <AddNewBookmarkDialog currentListId={currentListId!} />
           </div>
-          <Select defaultValue="newest">
-            <SelectTrigger className="w-[100px] hover:bg-accent">
-              <SelectValue placeholder="Sort by" className="hover:bg-accent" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="newest">Newest</SelectItem>
-              <SelectItem value="oldest">Oldest</SelectItem>
-              <SelectItem value="a-z">A-Z</SelectItem>
-              <SelectItem value="z-a">Z-A</SelectItem>
-            </SelectContent>
-          </Select>
-          <AddNewBookmarkDialog />
         </div>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 p-4 gap-4 overflow-hidden">
+          <DndContext
+            id={id}
+            sensors={sensors}
+            collisionDetection={closestCorners}
+            onDragEnd={onDragEnd}
+          >
+            <SortableContext
+              items={items}
+              strategy={rectSwappingStrategy}
+              disabled={!isDraggable}
+            >
+              {items.map((item) => (
+                <BookmarkCard
+                  title={`${item.title} ${item.id}`}
+                  description={item.description}
+                  imageSrc={item.imageSrc}
+                  url={item.url}
+                  parentSite={item.parentSite}
+                  isDraggable={isDraggable}
+                  id={item.id}
+                  key={item.id}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
+        </div>
+        <FloatingEditButton
+          isEditing={isDraggable}
+          onClick={() => {
+            setIsDraggable(!isDraggable);
+          }}
+        />
+      </div>
+    );
+
+  return <SkeletonCollectionView />;
+}
+
+function SkeletonCollectionView() {
+  return (
+    <div className="flex-1 flex flex-col justify-center">
+      <header className="h-14 border-b bg-muted/40"></header>
+      <div className="flex items-center px-4 h-14 border-b gap-4">
+        <Skeleton className="w-[40%] h-6" />
       </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 p-4 gap-4 overflow-hidden">
-        <DndContext
-          id={id}
-          sensors={sensors}
-          collisionDetection={closestCorners}
-          onDragEnd={onDragEnd}
-        >
-          <SortableContext
-            items={items}
-            strategy={rectSwappingStrategy}
-            disabled={!isDraggable}
-          >
-            {items.map((item) => (
-              <BookmarkCard
-                title={`${item.title} ${item.id}`}
-                description={item.description}
-                imageSrc={item.imageSrc}
-                url={item.url}
-                parentSite={item.parentSite}
-                isDraggable={isDraggable}
-                id={item.id}
-                key={item.id}
-              />
-            ))}
-          </SortableContext>
-        </DndContext>
+        <SkeletonBookmarkCard />
+        <SkeletonBookmarkCard />
+        <SkeletonBookmarkCard />
+        <SkeletonBookmarkCard />
+        <SkeletonBookmarkCard />
       </div>
-      <FloatingEditButton
-        isEditing={isDraggable}
-        onClick={() => {
-          setIsDraggable(!isDraggable);
-        }}
-      />
     </div>
   );
 }

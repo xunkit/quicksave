@@ -12,10 +12,13 @@ export interface Bookmark {
   url: string;
   parentSite: string;
   id: number;
+  sortIndex: number;
 }
 
 export interface ActionState {
   success: true | false;
   errors?: string[];
   message?: string;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data?: any;
 }

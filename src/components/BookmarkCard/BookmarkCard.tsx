@@ -17,6 +17,7 @@ import { Button } from "../ui/button";
 import { Copy, MoreHorizontal, Star, Trash } from "lucide-react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
+import { Skeleton } from "../ui/skeleton";
 
 interface BookmarkCardProps {
   id: number;
@@ -108,6 +109,29 @@ function BookmarkCard({
         </CardFooter>
       </Card>
     </Comp>
+  );
+}
+
+export function SkeletonBookmarkCard() {
+  return (
+    <Card className="overflow-hidden">
+      <div className="-mt-6 relative">
+        <div className="overflow-hidden">
+          <Skeleton className="w-[100%] h-[150px]" />
+        </div>
+      </div>
+      <CardContent className="flex flex-col gap-2">
+        <CardTitle>
+          <Skeleton className="w-[100%] h-4" />
+        </CardTitle>
+        <CardDescription className="text-xs">
+          <Skeleton className="w-[100%] h-4" />
+        </CardDescription>
+      </CardContent>
+      <CardFooter className="text-xs text-muted-foreground">
+        <Skeleton className="w-[100%] h-4" />
+      </CardFooter>
+    </Card>
   );
 }
 

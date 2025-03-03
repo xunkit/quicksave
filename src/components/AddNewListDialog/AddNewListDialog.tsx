@@ -16,6 +16,7 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { addNewList } from "@/app/actions";
 import { ActionState } from "@/types";
+import { mutate } from "swr";
 
 const initialState: ActionState = {
   success: false,
@@ -40,6 +41,7 @@ function AddNewListDialog() {
     if (state.success) {
       setNewListName("");
       setOpen(false);
+      mutate("lists");
     } else {
       setErrors(state.errors ? state.errors : []);
     }

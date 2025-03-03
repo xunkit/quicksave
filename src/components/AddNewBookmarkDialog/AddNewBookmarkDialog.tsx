@@ -16,6 +16,7 @@ import { Input } from "../ui/input";
 import { Label } from "../ui/label";
 import { addNewBookmark } from "@/app/actions";
 import { ActionState } from "@/types";
+import { mutate } from "swr";
 
 const initialState: ActionState = {
   success: false,
@@ -23,7 +24,11 @@ const initialState: ActionState = {
   errors: [],
 };
 
-function AddNewBookmarkDialog() {
+interface AddNewBookmarkDialogProps {
+  currentListId: string;
+}
+
+function AddNewBookmarkDialog({ currentListId }: AddNewBookmarkDialogProps) {
   const [open, setOpen] = React.useState<boolean>(false);
   const [link, setLink] = React.useState<string>("");
   const [state, action, pending] = React.useActionState(
@@ -40,9 +45,11 @@ function AddNewBookmarkDialog() {
     if (state.success) {
       setLink("");
       setOpen(false);
+      mutate(`bookmarks-${currentListId}`);
     } else {
       setErrors(state.errors ? state.errors : []);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [state]);
 
   // What this does: reset the list name field and set errors to an empty array (resetting the error)
@@ -75,6 +82,9 @@ function AddNewBookmarkDialog() {
           </DialogDescription>
         </DialogHeader>
         <form action={action}>
+          {/* We need to pass currentListId to the formData but cannot pass it to the action */}
+          {/* This is the recommended work-around */}
+          <input type="hidden" name="listId" value={currentListId} />
           <div className="py-4">
             <div className="flex items-center gap-4">
               <Label htmlFor="link" className="text-right">

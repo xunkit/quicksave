@@ -33,9 +33,9 @@ const zodValidate = (
 
 // ACTIONS ARE BELOW
 
-// GET LIST BY USER ---------------------------
+// GET LISTS BY USER ---------------------------
 
-export const getListByUser = async () => {
+export const getListsByUser = async () => {
   const session = await auth();
 
   if (!session?.user) {
@@ -51,6 +51,26 @@ export const getListByUser = async () => {
 };
 
 // --------------------------- GET LIST BY USER
+
+// GET BOOKMARKS BY LISTID ---------------------------
+
+export const getBookmarksByListId = async (listId: string) => {
+  const session = await auth();
+
+  if (!session?.user) {
+    throw new Error("Invalid Session");
+  }
+
+  try {
+    const res = await fetchFromAPI("/lists/" + listId);
+    const { bookmarks } = await res.json();
+    return bookmarks;
+  } catch (error) {
+    throw error;
+  }
+};
+
+// --------------------------- GET BOOKMARKS BY LISTID
 
 // ADD NEW LIST -----------------------------
 
@@ -68,13 +88,24 @@ export async function addNewList(
   formData: FormData
 ): Promise<ActionState> {
   try {
+    const session = await auth();
+
+    if (!session?.user) {
+      throw new Error("Invalid Session");
+    }
+
     zodValidate(addNewListSchema, { newListName: formData.get("newListName") });
-    const data = await fetch(
-      "http://localhost:8080/lists/a78daef6-1df6-48b3-a264-59d828b37d52",
-      { method: "GET" }
-    );
-    const text = await data.text();
-    return { success: false, errors: [text] };
+    await fetchFromAPI("/lists", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        name: formData.get("newListName"),
+        userId: session.user.id,
+      }),
+    });
+    return { success: true };
   } catch (error: any) {
     return error;
   }
@@ -97,19 +128,25 @@ export async function addNewBookmark(
   formData: FormData
 ): Promise<ActionState> {
   try {
+    const session = await auth();
+
+    if (!session?.user) {
+      throw new Error("Invalid Session");
+    }
+
     zodValidate(addNewBookmarkSchema, { link: formData.get("link") });
-    const data = await fetch(`http://localhost:8080/lists`, {
+    await fetch(`http://localhost:8080/bookmarks`, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        name: formData.get("link"),
-        userId: "kiet",
+        url: formData.get("link"),
+        userId: session.user.id,
+        listId: formData.get("listId"),
       }),
     });
-    const text = await data.text();
-    return { success: false, errors: [text] };
+    return { success: true };
   } catch (error: any) {
     return error;
   }
