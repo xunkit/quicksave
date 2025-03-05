@@ -10,6 +10,8 @@ import {
   minCharacterCountOfListName,
 } from "@/constants";
 import fetchFromAPI from "@/lib/fetchFromBackendAPI";
+import fetchPageAndReturnPageInfo from "@/lib/fetchPageAndReturnPageInfo";
+import { getParentSite } from "@/lib/utils";
 
 import { ActionState } from "@/types";
 import { z } from "zod";
@@ -107,6 +109,11 @@ export async function addNewList(
     });
     return { success: true };
   } catch (error: any) {
+    // To check if the error is not caused by Zod validation (because Zod will return an action state with "SUCCESS" in it)
+    if (!("success" in error)) {
+      console.error(error);
+      return { success: false, errors: ["An unexpected error occurred"] };
+    }
     return error;
   }
 }
@@ -135,7 +142,10 @@ export async function addNewBookmark(
     }
 
     zodValidate(addNewBookmarkSchema, { link: formData.get("link") });
-    await fetch(`http://localhost:8080/bookmarks`, {
+    const { title: generatedTitle, ogImage: generatedImg } =
+      await fetchPageAndReturnPageInfo(formData.get("link") as string);
+
+    await fetchFromAPI("/bookmarks", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -144,12 +154,65 @@ export async function addNewBookmark(
         url: formData.get("link"),
         userId: session.user.id,
         listId: formData.get("listId"),
+        title: formData.get("title") ? formData.get("title") : generatedTitle,
+        description: formData.get("description")
+          ? formData.get("description")
+          : null,
+        parentSite: getParentSite(formData.get("link") as string),
+        imageSrc: generatedImg,
       }),
     });
-    return { success: true };
+    return {
+      success: true,
+      data: {
+        url: formData.get("link"),
+        userId: session.user.id,
+        listId: formData.get("listId"),
+        title: formData.get("title") ? formData.get("title") : generatedTitle,
+        description: formData.get("description")
+          ? formData.get("description")
+          : null,
+        parentSite: getParentSite(formData.get("link") as string),
+        imageSrc: generatedImg,
+      },
+    };
   } catch (error: any) {
+    // To check if the error is not caused by Zod validation (because Zod will return an action state with "SUCCESS" in it)
+    if (!("success" in error)) {
+      console.error(error);
+      return { success: false, errors: ["An unexpected error occurred"] };
+    }
     return error;
   }
 }
 
 // ----------------------------- ADD NEW BOOKMARK
+
+// DELETE BOOKMARK -----------------------------
+
+export async function deleteBookmark(
+  prevState: any,
+  formData: FormData
+): Promise<ActionState> {
+  try {
+    const session = await auth();
+
+    if (!session?.user) {
+      throw new Error("Invalid Session");
+    }
+
+    await fetchFromAPI(`/bookmarks/${formData.get("bookmarkId")}`, {
+      method: "DELETE",
+    });
+    return { success: true };
+  } catch (error: any) {
+    // To check if the error is not caused by Zod validation (because Zod will return an action state with "SUCCESS" in it)
+    if (!("success" in error)) {
+      console.error(error);
+      return { success: false, errors: ["An unexpected error occurred"] };
+    }
+    return error;
+  }
+}
+
+// ----------------------------- DELETE BOOKMARK

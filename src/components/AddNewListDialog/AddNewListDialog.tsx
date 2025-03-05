@@ -26,7 +26,6 @@ const initialState: ActionState = {
 
 function AddNewListDialog() {
   const [open, setOpen] = React.useState<boolean>(false);
-  const [newListName, setNewListName] = React.useState<string>("");
   const [state, action, pending] = React.useActionState(
     addNewList,
     initialState
@@ -39,7 +38,6 @@ function AddNewListDialog() {
   // - Check if the submission was NOT OK, if NOT OK -> pass errors from the action state to 'errors'
   React.useEffect(() => {
     if (state.success) {
-      setNewListName("");
       setOpen(false);
       mutate("lists");
     } else {
@@ -50,7 +48,6 @@ function AddNewListDialog() {
   // What this does: reset the list name field and set errors to an empty array (resetting the error)
   const resetForm = () => {
     if (!open) {
-      setNewListName("");
       setErrors([]);
     }
   };
@@ -84,8 +81,6 @@ function AddNewListDialog() {
               </Label>
               <Input
                 id="name"
-                value={newListName}
-                onChange={(e) => setNewListName(e.target.value)}
                 className="col-span-3"
                 name="newListName"
                 required

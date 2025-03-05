@@ -17,6 +17,7 @@ import { Label } from "../ui/label";
 import { addNewBookmark } from "@/app/actions";
 import { ActionState } from "@/types";
 import { mutate } from "swr";
+import { useLists } from "@/hooks/useLists";
 
 const initialState: ActionState = {
   success: false,
@@ -29,8 +30,9 @@ interface AddNewBookmarkDialogProps {
 }
 
 function AddNewBookmarkDialog({ currentListId }: AddNewBookmarkDialogProps) {
+  const { refreshLists } = useLists();
+
   const [open, setOpen] = React.useState<boolean>(false);
-  const [link, setLink] = React.useState<string>("");
   const [state, action, pending] = React.useActionState(
     addNewBookmark,
     initialState
@@ -39,13 +41,14 @@ function AddNewBookmarkDialog({ currentListId }: AddNewBookmarkDialogProps) {
 
   // Every time the form is submitted, this is triggered.
   // What it does:
-  // - Check if the submission was OK, if OK -> close the form and erase form data
+  // - Check if the submission was OK, if OK -> close the form and refetch the data
   // - Check if the submission was NOT OK, if NOT OK -> pass errors from the action state to 'errors'
   React.useEffect(() => {
     if (state.success) {
-      setLink("");
       setOpen(false);
       mutate(`bookmarks-${currentListId}`);
+      // Silently re-fetch the lists (does NOT trigger revalidation = no loading skeleton!!)
+      refreshLists();
     } else {
       setErrors(state.errors ? state.errors : []);
     }
@@ -55,7 +58,6 @@ function AddNewBookmarkDialog({ currentListId }: AddNewBookmarkDialogProps) {
   // What this does: reset the list name field and set errors to an empty array (resetting the error)
   const resetForm = () => {
     if (!open) {
-      setLink("");
       setErrors([]);
     }
   };
@@ -86,18 +88,29 @@ function AddNewBookmarkDialog({ currentListId }: AddNewBookmarkDialogProps) {
           {/* This is the recommended work-around */}
           <input type="hidden" name="listId" value={currentListId} />
           <div className="py-4">
-            <div className="flex items-center gap-4">
-              <Label htmlFor="link" className="text-right">
-                Link
-              </Label>
-              <Input
-                id="link"
-                value={link}
-                onChange={(e) => setLink(e.target.value)}
-                className="col-span-3"
-                name="link"
-                required
-              />
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-4">
+                <Label htmlFor="link" className="text-right">
+                  Link
+                </Label>
+                <Input id="link" className="col-span-3" name="link" required />
+              </div>
+              <div className="flex items-center gap-4">
+                <Label htmlFor="link" className="text-right">
+                  Title
+                </Label>
+                <Input id="title" className="col-span-3" name="title" />
+              </div>
+              <div className="flex items-center gap-4">
+                <Label htmlFor="description" className="text-right">
+                  Description
+                </Label>
+                <Input
+                  id="description"
+                  className="col-span-3"
+                  name="description"
+                />
+              </div>
             </div>
           </div>
           {errors.map((error, index) => (

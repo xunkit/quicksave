@@ -2,33 +2,24 @@
 
 import CollectionView from "@/components/CollectionView";
 import Sidebar from "@/components/Sidebar";
-import useSWRImmutable from "swr/immutable";
-import { getBookmarksByListId, getListsByUser } from "../actions";
 import React from "react";
-import { List } from "@/types";
+import { useLists } from "@/hooks/useLists";
+import { useBookmarks } from "@/hooks/useBookmarks";
 
 export default function Home() {
-  // I'm using useSWRImmutable instead of useSWR
-  // Which means: it only re-fetches when I mutate the path. Or else stay the same
-  // If I used useSWR it would refetch like crazy (especially with isValidating)
-
   const {
-    data: lists,
+    lists,
     error: listsError,
     isValidating: listsLoading,
-  } = useSWRImmutable("lists", getListsByUser);
-  const [currentListId, setCurrentListId] = React.useState<string | null>(null);
-  const currentListName = currentListId
-    ? lists.find((list: List) => list.id === currentListId).name
-    : null;
+    currentList,
+    setCurrentListId,
+  } = useLists();
 
   const {
-    data: bookmarks,
-    error: bookmarksError,
+    bookmarks,
     isValidating: bookmarksLoading,
-  } = useSWRImmutable(currentListId ? `bookmarks-${currentListId}` : null, () =>
-    getBookmarksByListId(currentListId!)
-  );
+    error: bookmarksError,
+  } = useBookmarks(currentList?.id ?? null);
 
   if (listsError) return <p>Error loading lists: ${listsError}</p>;
   if (bookmarksError) return <p>Error loading bookmarks: ${bookmarksError}</p>;
@@ -38,15 +29,15 @@ export default function Home() {
       <Sidebar
         lists={lists}
         skeleton={listsLoading}
-        currentListId={currentListId}
+        currentListId={currentList?.id}
         setCurrentListId={setCurrentListId}
       />
       <CollectionView
         skeleton={bookmarksLoading}
-        noListSelected={currentListId === null}
+        noListSelected={currentList === null}
         bookmarks={bookmarks}
-        currentListName={currentListName}
-        currentListId={currentListId}
+        currentListName={currentList?.name}
+        currentListId={currentList?.id}
       />
     </div>
   );

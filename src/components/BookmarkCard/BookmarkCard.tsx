@@ -18,15 +18,18 @@ import { Copy, MoreHorizontal, Star, Trash } from "lucide-react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Skeleton } from "../ui/skeleton";
+import DeleteBookmarkDialog from "../DeleteBookmarkDialog";
 
 interface BookmarkCardProps {
-  id: number;
+  id: string;
   title: string;
   description: string;
   url: string;
   imageSrc: string;
   parentSite: string;
   isDraggable: boolean;
+  // This is for revalidation after removing a Bookmark
+  currentListId: string;
 }
 
 function BookmarkCard({
@@ -37,6 +40,7 @@ function BookmarkCard({
   imageSrc,
   parentSite,
   isDraggable,
+  currentListId,
 }: BookmarkCardProps) {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({ id });
@@ -60,14 +64,14 @@ function BookmarkCard({
       {...listeners}
       style={style}
     >
-      <Card className="overflow-hidden">
+      <Card className="overflow-hidden h-[100%] justify-between">
         <div className="-mt-6 relative">
           <div className="overflow-hidden">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={imageSrc}
               alt="Preview image"
-              className="w-[100%] group-hover:scale-105 transition-transform duration-300 ease-in-out"
+              className="w-[100%] h-[200px] group-hover:scale-105 transition-transform duration-300 ease-in-out"
             />
           </div>
           {isDraggable === false && (
@@ -92,10 +96,20 @@ function BookmarkCard({
                   <span>Copy URL</span>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive">
-                  <Trash className="mr-2 h-4 w-4" />
-                  <span>Delete</span>
-                </DropdownMenuItem>
+                <DeleteBookmarkDialog
+                  bookmarkId={id}
+                  currentListId={currentListId}
+                >
+                  <DropdownMenuItem
+                    variant="destructive"
+                    onSelect={(e: Event) => {
+                      e.preventDefault();
+                    }}
+                  >
+                    <Trash className="mr-2 h-4 w-4" />
+                    <span>Delete</span>
+                  </DropdownMenuItem>
+                </DeleteBookmarkDialog>
               </DropdownMenuContent>
             </DropdownMenu>
           )}

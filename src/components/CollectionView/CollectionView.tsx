@@ -62,7 +62,7 @@ function CollectionView({
 
   // getItemPosition: get Item's index
   const getItemPosition = (id: number) => {
-    return items.findIndex((item) => item.id === Number(id));
+    return items.findIndex((item) => item.sortIndex === Number(id));
   };
 
   // onDragEnd: re-sort the array of Items
@@ -145,7 +145,7 @@ function CollectionView({
             >
               {items.map((item) => (
                 <BookmarkCard
-                  title={`${item.title} ${item.id}`}
+                  title={item.title}
                   description={item.description}
                   imageSrc={item.imageSrc}
                   url={item.url}
@@ -153,6 +153,7 @@ function CollectionView({
                   isDraggable={isDraggable}
                   id={item.id}
                   key={item.id}
+                  currentListId={currentListId!}
                 />
               ))}
             </SortableContext>

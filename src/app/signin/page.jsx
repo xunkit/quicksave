@@ -1,10 +1,6 @@
 import { auth, signIn, signOut } from "@/auth";
 
-export default async function SignIn({
-  searchParams,
-}: {
-  searchParams: { callbackUrl?: string };
-}) {
+export default async function SignIn({ searchParams }) {
   const session = await auth();
   const callbackUrl = searchParams?.callbackUrl || "/app";
 
