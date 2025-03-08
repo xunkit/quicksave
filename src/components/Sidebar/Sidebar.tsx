@@ -4,6 +4,17 @@ import { Button } from "../ui/button";
 import AddNewListDialog from "../AddNewListDialog";
 import { List } from "@/types";
 import { Skeleton } from "../ui/skeleton";
+import { Edit, MoreHorizontal, Trash } from "lucide-react";
+
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "../ui/dropdown-menu";
+import DeleteListDialog from "../DeleteListDialog";
+import EditListDialog from "../EditListDialog";
 
 interface SidebarProps {
   skeleton: boolean;
@@ -32,19 +43,53 @@ function Sidebar({
           <p className="font-semibold px-4 text-sm mb-2">Your Lists</p>
 
           {lists.map((list) => (
-            <Button
-              className={`justify-between cursor-pointer ${
-                list.id === currentListId ? "bg-accent" : ""
-              }`}
-              variant="ghost"
-              onClick={() => setCurrentListId(list.id)}
-              key={list.id}
-            >
-              <p>{list.name}</p>
-              <p className="text-muted-foreground text-xs font-normal">
-                {list.bookmarks.length}
-              </p>
-            </Button>
+            <div key={list.id} className="w-[100%] relative">
+              <Button
+                className={`justify-between cursor-pointer w-[100%] ${
+                  list.id === currentListId ? "bg-accent" : ""
+                }`}
+                variant="ghost"
+                onClick={() => setCurrentListId(list.id)}
+              >
+                <p>{list.name}</p>
+              </Button>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    className="text-muted-foreground text-xs font-normal aspect-square absolute right-0"
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
+
+                    <span className="sr-only">Open menu</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <EditListDialog listId={list.id} defaultListName={list.name}>
+                    <DropdownMenuItem
+                      onSelect={(e: Event) => {
+                        e.preventDefault();
+                      }}
+                    >
+                      <Edit className="mr-2 h-4 w-4" />
+                      <span>Edit</span>
+                    </DropdownMenuItem>
+                  </EditListDialog>
+                  <DropdownMenuSeparator />
+                  <DeleteListDialog listId={list.id}>
+                    <DropdownMenuItem
+                      variant="destructive"
+                      onSelect={(e: Event) => {
+                        e.preventDefault();
+                      }}
+                    >
+                      <Trash className="mr-2 h-4 w-4" />
+                      <span>Delete</span>
+                    </DropdownMenuItem>
+                  </DeleteListDialog>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
           ))}
         </div>
       </div>

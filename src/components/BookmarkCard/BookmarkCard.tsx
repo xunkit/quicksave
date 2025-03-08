@@ -14,11 +14,12 @@ import {
   DropdownMenuTrigger,
 } from "../ui/dropdown-menu";
 import { Button } from "../ui/button";
-import { Copy, MoreHorizontal, Star, Trash } from "lucide-react";
+import { Copy, Edit, MoreHorizontal, Trash } from "lucide-react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Skeleton } from "../ui/skeleton";
 import DeleteBookmarkDialog from "../DeleteBookmarkDialog";
+import EditBookmarkDialog from "../EditBookmarkDialog";
 
 interface BookmarkCardProps {
   id: string;
@@ -87,10 +88,21 @@ function BookmarkCard({
                 </Button>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end">
-                <DropdownMenuItem>
-                  <Star className="mr-2 h-4 w-4" />
-                  <span>Favorite</span>
-                </DropdownMenuItem>
+                <EditBookmarkDialog
+                  bookmarkId={id}
+                  defaultTitle={title}
+                  defaultDescription={description}
+                  currentListId={currentListId}
+                >
+                  <DropdownMenuItem
+                    onSelect={(e: Event) => {
+                      e.preventDefault();
+                    }}
+                  >
+                    <Edit className="mr-2 h-4 w-4" />
+                    <span>Edit bookmark</span>
+                  </DropdownMenuItem>
+                </EditBookmarkDialog>
                 <DropdownMenuItem>
                   <Copy className="mr-2 h-4 w-4" />
                   <span>Copy URL</span>

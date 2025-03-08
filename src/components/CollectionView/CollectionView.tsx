@@ -53,6 +53,10 @@ function CollectionView({
 
   const [items, setItems] = React.useState<Array<Bookmark>>([]);
 
+  const [sortLogic, setSortLogic] = React.useState<"newest" | "oldest">(
+    "newest"
+  );
+
   React.useEffect(() => {
     if (bookmarks) setItems(bookmarks);
   }, [bookmarks]);
@@ -103,8 +107,7 @@ function CollectionView({
 
   if (!skeleton)
     return (
-      <div className="flex-1 flex flex-col">
-        <header className="h-14 border-b bg-muted/40"></header>
+      <>
         <div className="flex items-center px-4 h-14 border-b">
           <h2 className="font-bold flex-1">{currentListName}</h2>
           <div className="flex gap-2">
@@ -116,7 +119,12 @@ function CollectionView({
                 placeholder="Search"
               />
             </div>
-            <Select defaultValue="newest">
+            <Select
+              defaultValue="newest"
+              onValueChange={(value: "newest" | "oldest") =>
+                setSortLogic(value)
+              }
+            >
               <SelectTrigger className="w-[100px] hover:bg-accent">
                 <SelectValue
                   placeholder="Sort by"
@@ -143,19 +151,26 @@ function CollectionView({
               strategy={rectSwappingStrategy}
               disabled={!isDraggable}
             >
-              {items.map((item) => (
-                <BookmarkCard
-                  title={item.title}
-                  description={item.description}
-                  imageSrc={item.imageSrc}
-                  url={item.url}
-                  parentSite={item.parentSite}
-                  isDraggable={isDraggable}
-                  id={item.id}
-                  key={item.id}
-                  currentListId={currentListId!}
-                />
-              ))}
+              {items
+                .sort((a, b) => {
+                  if (sortLogic === "newest") return b.sortIndex - a.sortIndex;
+                  else {
+                    return a.sortIndex - b.sortIndex;
+                  }
+                })
+                .map((item) => (
+                  <BookmarkCard
+                    title={item.title}
+                    description={item.description}
+                    imageSrc={item.imageSrc}
+                    url={item.url}
+                    parentSite={item.parentSite}
+                    isDraggable={isDraggable}
+                    id={item.id}
+                    key={item.id}
+                    currentListId={currentListId!}
+                  />
+                ))}
             </SortableContext>
           </DndContext>
         </div>
@@ -165,7 +180,7 @@ function CollectionView({
             setIsDraggable(!isDraggable);
           }}
         />
-      </div>
+      </>
     );
 
   return <SkeletonCollectionView />;

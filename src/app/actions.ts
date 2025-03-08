@@ -188,6 +188,120 @@ export async function addNewBookmark(
 
 // ----------------------------- ADD NEW BOOKMARK
 
+// CHANGE LIST NAME -----------------------------
+
+const changeListNameSchema = z.object({
+  newListName: z
+    .string({
+      invalid_type_error: "Invalid List Name",
+    })
+    .min(minCharacterCountOfListName)
+    .max(maxCharacterCountOfListName),
+});
+
+export async function changeListName(
+  prevState: any,
+  formData: FormData
+): Promise<ActionState> {
+  try {
+    const session = await auth();
+
+    if (!session?.user) {
+      throw new Error("Invalid Session");
+    }
+
+    const listId = formData.get("listId");
+    const newListName = formData.get("newListName");
+
+    if (!listId || typeof listId !== "string") {
+      throw new Error("Invalid List ID");
+    }
+
+    zodValidate(changeListNameSchema, { newListName });
+
+    await fetchFromAPI(`/lists/${listId}/name`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ newListName }),
+    });
+
+    return { success: true };
+  } catch (error: any) {
+    if (!("success" in error)) {
+      console.error(error);
+      return { success: false, errors: ["An unexpected error occurred"] };
+    }
+    return error;
+  }
+}
+
+// ----------------------------- CHANGE LIST NAME
+
+// EDIT BOOKMARK
+const editBookmarkSchema = z.object({
+  title: z.string().optional(),
+  description: z.string().optional(),
+});
+
+export async function editBookmark(
+  prevState: any,
+  formData: FormData
+): Promise<ActionState> {
+  try {
+    const session = await auth();
+
+    if (!session?.user) {
+      throw new Error("Invalid Session");
+    }
+
+    const bookmarkId = formData.get("bookmarkId");
+    if (!bookmarkId || typeof bookmarkId !== "string") {
+      throw new Error("Invalid Bookmark ID");
+    }
+
+    // Validate title and description
+    zodValidate(editBookmarkSchema, {
+      title: formData.get("title"),
+      description: formData.get("description"),
+    });
+
+    // Ensure fields have valid values
+    const title =
+      formData.get("title") && formData.get("title") !== ""
+        ? formData.get("title")
+        : undefined; // Don't send if empty
+
+    const description =
+      formData.get("description") && formData.get("description") !== ""
+        ? formData.get("description")
+        : "";
+
+    // Send API request to update the bookmark
+    await fetchFromAPI(`/bookmarks/${bookmarkId}`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        title: title || "(Untitled)", // Avoids sending empty values
+        description: description, // Ensures empty description is saved as null
+      }),
+    });
+
+    return { success: true };
+  } catch (error: any) {
+    if (!("success" in error)) {
+      console.error(error);
+      return { success: false, errors: ["An unexpected error occurred"] };
+    }
+    return error;
+  }
+}
+
+// ----------------------------- EDIT BOOKMARK
+
 // DELETE BOOKMARK -----------------------------
 
 export async function deleteBookmark(
@@ -216,3 +330,32 @@ export async function deleteBookmark(
 }
 
 // ----------------------------- DELETE BOOKMARK
+
+// DELETE LIST -----------------------------
+
+export async function deleteList(
+  prevState: any,
+  formData: FormData
+): Promise<ActionState> {
+  try {
+    const session = await auth();
+
+    if (!session?.user) {
+      throw new Error("Invalid Session");
+    }
+
+    await fetchFromAPI(`/lists/${formData.get("listId")}`, {
+      method: "DELETE",
+    });
+    return { success: true };
+  } catch (error: any) {
+    // To check if the error is not caused by Zod validation (because Zod will return an action state with "SUCCESS" in it)
+    if (!("success" in error)) {
+      console.error(error);
+      return { success: false, errors: ["An unexpected error occurred"] };
+    }
+    return error;
+  }
+}
+
+// ----------------------------- DELETE LIST

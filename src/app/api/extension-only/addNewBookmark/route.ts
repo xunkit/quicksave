@@ -11,7 +11,7 @@ export async function POST(req: Request) {
   }
 
   try {
-    const { url, listId } = await req.json();
+    const { url, listId, title } = await req.json();
 
     if (!url) {
       return new Response(JSON.stringify({ message: "URL is required" }), {
@@ -28,6 +28,7 @@ export async function POST(req: Request) {
     const formData = new FormData();
     formData.append("link", url);
     formData.append("listId", listId);
+    formData.append("title", title);
     const res = await addNewBookmark({}, formData);
 
     return new Response(

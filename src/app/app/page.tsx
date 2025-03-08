@@ -32,13 +32,16 @@ export default function Home() {
         currentListId={currentList?.id}
         setCurrentListId={setCurrentListId}
       />
-      <CollectionView
-        skeleton={bookmarksLoading}
-        noListSelected={currentList === null}
-        bookmarks={bookmarks}
-        currentListName={currentList?.name}
-        currentListId={currentList?.id}
-      />
+      <div className="flex-1 flex flex-col">
+        <header className="h-14 border-b bg-muted/40"></header>
+        <CollectionView
+          skeleton={bookmarksLoading}
+          noListSelected={currentList === null}
+          bookmarks={bookmarks}
+          currentListName={currentList?.name}
+          currentListId={currentList?.id}
+        />
+      </div>
     </div>
   );
 }

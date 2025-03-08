@@ -12,7 +12,7 @@ import {
   AlertDialogTrigger,
 } from "../ui/alert-dialog";
 
-import { deleteBookmark } from "@/app/actions";
+import { deleteList } from "@/app/actions";
 import { ActionState } from "@/types";
 import { mutate } from "swr";
 import { useLists } from "@/hooks/useLists";
@@ -24,22 +24,17 @@ const initialState: ActionState = {
   errors: [],
 };
 
-interface DeleteBookmarkDialogProps {
-  bookmarkId: string;
-  currentListId: string;
+interface DeleteListDialogProps {
+  listId: string;
   children: React.ReactNode;
 }
 
-function DeleteBookmarkDialog({
-  bookmarkId,
-  currentListId,
-  children,
-}: DeleteBookmarkDialogProps) {
-  const { refreshLists } = useLists();
+function DeleteListDialog({ listId, children }: DeleteListDialogProps) {
+  const { refreshLists, setCurrentListId } = useLists();
 
   const [open, setOpen] = React.useState<boolean>(false);
   const [state, action, pending] = React.useActionState(
-    deleteBookmark,
+    deleteList,
     initialState
   );
   const [errors, setErrors] = React.useState<Array<string>>([]);
@@ -50,8 +45,9 @@ function DeleteBookmarkDialog({
   // - Check if the submission was NOT OK, if NOT OK -> pass errors from the action state to 'errors'
   React.useEffect(() => {
     if (state.success) {
+      setCurrentListId(null);
       refreshLists();
-      mutate(`bookmarks-${currentListId}`);
+      mutate(`lists`);
       setOpen(false);
     } else {
       setErrors(state.errors ? state.errors : []);
@@ -80,15 +76,15 @@ function DeleteBookmarkDialog({
           <AlertDialogTitle>Are you sure?</AlertDialogTitle>
           <AlertDialogDescription>
             This action cannot be undone. This will permanently delete this
-            bookmark.
+            list.
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
           <AlertDialogCancel disabled={pending}>Cancel</AlertDialogCancel>
-          <form action={action}>
-            {/* We need to pass the current bookmark's id to the formData but cannot pass it to the action */}
+          <form action={action} onSubmit={(e) => e.stopPropagation()}>
+            {/* We need to pass the current list's id to the formData but cannot pass it to the action */}
             {/* This is the recommended work-around */}
-            <input type="hidden" name="bookmarkId" value={bookmarkId} />
+            <input type="hidden" name="listId" value={listId} />
             <Button type="submit" disabled={pending}>
               Delete
             </Button>
@@ -108,4 +104,4 @@ function DeleteBookmarkDialog({
   );
 }
 
-export default DeleteBookmarkDialog;
+export default DeleteListDialog;
